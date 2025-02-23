@@ -1,0 +1,68 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const todoForm = document.getElementById('todoForm');
+    const todoInput = document.getElementById('todoInput');
+    const todoList = document.getElementById('todoList');
+  
+
+    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    savedTasks.forEach(task => addTaskToDOM(task));
+  
+    // Add new task when form is submitted
+    todoForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const taskText = todoInput.value.trim();
+      if (taskText !== '') {
+        const task = { text: taskText, completed: false };
+        addTaskToDOM(task);
+        saveTask(task);
+        todoInput.value = '';
+      }
+    });
+  
+    function addTaskToDOM(task) {
+      const li = document.createElement('li');
+      if(task.completed) {
+        li.classList.add('completed');
+      }
+  
+      const span = document.createElement('span');
+      span.textContent = task.text;
+      // Toggle completion state when task text is clicked
+      span.addEventListener('click', () => {
+        li.classList.toggle('completed');
+        updateLocalStorage();
+      });
+      li.appendChild(span);
+  
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Remove';
+      // Remove task when remove button is clicked
+      removeButton.addEventListener('click', () => {
+        li.remove();
+        updateLocalStorage();
+      });
+      li.appendChild(removeButton);
+  
+      todoList.appendChild(li);
+    }
+  
+    // Save a new task to local storage
+    function saveTask(task) {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.push(task);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+  
+    // Update local storage based on current tasks in the DOM
+    function updateLocalStorage() {
+      const tasks = [];
+      todoList.querySelectorAll('li').forEach(li => {
+        tasks.push({
+          text: li.querySelector('span').textContent,
+          completed: li.classList.contains('completed')
+        });
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+  });
+  
